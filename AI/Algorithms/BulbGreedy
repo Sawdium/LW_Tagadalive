@@ -84,6 +84,7 @@ class BulbGreedy {
 				if (!ally.passives[EFFECT_POISON_TO_SCIENCE]) continue
 				real? danger = BattleState.allyDanger[ally]
 				if (danger != null && danger! > 0) continue
+				if (ally.psnlife < 500) continue
 				psnTarget = ally
 				break
 			}
