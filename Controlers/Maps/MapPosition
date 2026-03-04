@@ -116,11 +116,14 @@ class MapPosition {
 		integer fightType = getFightType()
 
 		if (fightType == FIGHT_TYPE_TEAM) {
-			// Team fight: attract to ally turret (protect) and enemy turret (attack)
+			// Team fight: early turns protect ally turret, later turns push enemy turret
+			boolean earlyGame = getTurn() <= 5
+			real allyTurretGravity = earlyGame ? 20.0 : 10.0
+			real enemyTurretGravity = earlyGame ? 10.0 : 20.0
 			for (Entity ally in Fight.getAlliesAlive()) {
 				if (ally.entityType == ENTITY_TURRET) {
 					_gravity_distance[ally.cell] = ScoringConfig.IDEAL_DIST_ALLY
-					_gravity_coef[ally.cell] = ScoringConfig.W_GRAVITY_ALLY_TURRET
+					_gravity_coef[ally.cell] = allyTurretGravity
 					break  // Only one turret per team
 				}
 			}
@@ -128,7 +131,7 @@ class MapPosition {
 				if (enemy.entityType == ENTITY_TURRET) {
 					integer distToEnemy = _is_cac ? ScoringConfig.IDEAL_DIST_CAC : Scoring.IDEAL_DIST_RANGED
 					_gravity_distance[enemy.cell] = distToEnemy
-					_gravity_coef[enemy.cell] = ScoringConfig.W_GRAVITY_ENEMY_TURRET
+					_gravity_coef[enemy.cell] = enemyTurretGravity
 					break  // Only one turret per team
 				}
 			}
@@ -175,11 +178,13 @@ class MapPosition {
 			}
 		}
 
-		// Chests: gravity to collect loot
+		// Chests: gravity to collect loot (3x when winning hard)
+		real chestGravity = ScoringConfig.W_GRAVITY_CHEST
+		if (ScoringModifiers.getWinningModifier() <= 0.75) chestGravity *= 3.0
 		for (Entity enemy in Fight.getEnemiesAlive()) {
 			if (enemy.entityType == ENTITY_CHEST) {
 				_gravity_distance[enemy.cell] = 1  // Get adjacent to open
-				_gravity_coef[enemy.cell] = ScoringConfig.W_GRAVITY_CHEST
+				_gravity_coef[enemy.cell] = chestGravity
 			}
 		}
 	}
