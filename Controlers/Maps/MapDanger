@@ -32,7 +32,11 @@ class MapDanger {
 	// Enemy liberation coverage: for each enemy with liberation cd <= 1, which cells they can reach
 	// Only populated when BattleState.allyHasRst is true
 	static Map<Entity, Map<Cell, real>> _map_enemy_liberation = [:]
-	
+
+	// Per-turn danger cost stats: itemName → dims → [totalOps, count]
+	// Reset each refresh(), flushed to registers at end
+	static Map<string, Map<string, Array<integer>>> _dangerStats = [:]
+
 	/*
 	 * Actualise les informations en fonctions des enemies et alliés encore vivant.
 	 * Orchestre le round-robin avec priorité:
@@ -43,6 +47,7 @@ class MapDanger {
 	 */
 	static void refresh(){
 		// Reset caches (danger, support, and ally damage)
+		_dangerStats = [:]
 		_danger = [:]
 		_hash_danger = [:]
 		_map_entity_item_danger = [:]
@@ -115,6 +120,7 @@ class MapDanger {
 		// Check budget after Phase 1
 		if(getOperations() > dangerBudget){
 			MapDanger._logEarlyExit("Phase1", enemyRound, maxEnemyItems, allySupportRound, maxAllySupport, allyDamageRound, maxAllyDamage, enemies)
+			MapDanger._flushDangerStats()
 			return
 		}
 
@@ -145,6 +151,7 @@ class MapDanger {
 
 			if(getOperations() > dangerBudget){
 				MapDanger._logEarlyExit("Phase2", enemyRound, maxEnemyItems, allySupportRound, maxAllySupport, allyDamageRound, maxAllyDamage, enemies)
+				MapDanger._flushDangerStats()
 				return
 			}
 		}
@@ -158,6 +165,7 @@ class MapDanger {
 
 			if(getOperations() > dangerBudget){
 				MapDanger._logEarlyExit("Phase3", enemyRound, maxEnemyItems, allySupportRound, maxAllySupport, allyDamageRound, maxAllyDamage, enemies)
+				MapDanger._flushDangerStats()
 				return
 			}
 		}
@@ -171,8 +179,54 @@ class MapDanger {
 
 			if(getOperations() > dangerBudget){
 				MapDanger._logEarlyExit("Phase4", enemyRound, maxEnemyItems, allySupportRound, maxAllySupport, allyDamageRound, maxAllyDamage, enemies)
+				MapDanger._flushDangerStats()
 				return
 			}
+		}
+
+		MapDanger._flushDangerStats()
+	}
+
+	/*
+	 * Build dimension key for danger stats: turn bucket + MP bucket + jump/teleport flags
+	 */
+	static string _buildDimsKey(integer turn, integer mp, boolean hasJump, boolean hasTeleport) {
+		string t = turn <= 3 ? "" + turn : "w"
+		string m = mp <= 3 ? "l" : (mp <= 6 ? "m" : (mp <= 9 ? "h" : "x"))
+		string flags = ""
+		if (hasJump) flags += "j"
+		if (hasTeleport) flags += "t"
+		return t + m + flags
+	}
+
+	/*
+	 * Record operation cost for one getEnemiesDmgMap() call
+	 */
+	static void _recordItemCost(Item item, Entity enemy, integer cost) {
+		string dims = MapDanger._buildDimsKey(getTurn(), enemy.mp,
+			enemy.jumpCD <= 1 && enemy.jumpItem != null,
+			enemy.reachableCellsTeleport != null)
+		string name = item.name
+		if (_dangerStats[name] == null) _dangerStats[name] = [:]
+		if (_dangerStats[name]![dims] == null) _dangerStats[name]![dims] = [0, 0]
+		_dangerStats[name]![dims]![0] += cost
+		_dangerStats[name]![dims]![1] += 1
+	}
+
+	/*
+	 * Flush accumulated danger stats to registers (append-only)
+	 */
+	static void _flushDangerStats() {
+		for (string itemName : Map<string, Array<integer>> dimsMap in _dangerStats) {
+			string regKey = "d_" + itemName
+			Array<string> parts = []
+			for (string dims : Array<integer> val in dimsMap) {
+				push(parts, dims + ":" + ((val[0] / 1000) as integer) + "," + val[1])
+			}
+			string newData = join(parts, "|")
+			var existing = getRegister(regKey)
+			string updated = existing != null ? existing + "|" + newData : newData
+			setRegister(regKey, updated)
 		}
 	}
 
@@ -183,7 +237,9 @@ class MapDanger {
 		for(Entity e in enemies){
 			if(i < count(e.offensiveItems)){
 				Item item = e.offensiveItems[i]
+				integer opsBefore = getOperations()
 				_map_entity_item_danger[e]![item] = MapDanger.getEnemiesDmgMap(e, item)
+				MapDanger._recordItemCost(item, e, getOperations() - opsBefore)
 			}
 		}
 	}
