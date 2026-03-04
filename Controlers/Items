@@ -90,6 +90,9 @@ class Items {
 		integer limitCD = entity == Fight.self ? 0 : 1
 		for(Item item in entity.items){
 			if(item.haveCD && getCooldown(item.id, entity.id)>limitCD) continue;
+			// Skip items that can't threaten self: ally-only or bulb-only
+			if(item.targetKey >= Item.ALLIES && item.targetKey <= Item.ALLIESBULBS) continue;
+			if(item.targetKey == Item.ALLBULBS || item.targetKey == Item.ENEMIESBULBS) continue;
 			dmg=0.0;
 			for(ItemEffect e in item.effects){
 				if(e.type == EFFECT_DAMAGE ){
