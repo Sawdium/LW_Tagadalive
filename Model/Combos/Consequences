@@ -323,10 +323,10 @@ class Consequences {
 
 			for (Entity target in this.targets) {
 				if (this.isKilled(target)) continue
-				// Skip enemy dying from poison overkill (except damage in BR: secure the kill)
+				// Skip enemy dying from poison overkill (except damage on chest/BR: secure the kill)
 				if (!target.isFriend && target.nextAntidote >= 1) {
 					integer epsl = this.getHP(target) - target.psnTurn - this.getPsnPerTurn(target)
-					if (epsl <= 0 && (!Fight.isBattleRoyale || !action.item.isDamage)) continue
+					if (epsl <= 0 && (!action.item.isDamage || (target.entityType != ENTITY_CHEST && !Fight.isBattleRoyale))) continue
 				}
 				// Skip invincible enemies unless item works on invincible (shackles)
 				if (!target.isFriend && target.isInvincible && !action.item.worksOnInvincible) continue
