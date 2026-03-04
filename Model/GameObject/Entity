@@ -95,6 +95,8 @@ class Entity {
 	Item? jumpItem = null        // CHIP_JUMP item reference (for minRange/maxRange access)
 	integer teleportCD = 11      // CHIP_TELEPORTATION cooldown (11 = no chip, 0-10 = current cd)
 	Item? teleportItem = null    // CHIP_TELEPORTATION item reference
+	integer grappleCD = 4        // CHIP_GRAPPLE cooldown (4 = no chip, 0-3 = current cd)
+	Item? grappleItem = null     // CHIP_GRAPPLE item reference (for melee range extension in MapDanger)
 	boolean canDie = false       // Set by BattleState: danger >= life * CANDIE_THRESHOLD
 	boolean isOTK = false        // Entity has OTK potential (high STR + AGI + SNC)
 	boolean willBeDead = false   // Poison will kill before anyone can antidote (set by MapDanger)
@@ -161,6 +163,9 @@ class Entity {
 				this.teleportCD = getCooldown(item.id, this.id)!
 				this.teleportItem = item
 				MapPath._teleportMaxRange = item.maxRange
+			} else if (item.id == CHIP_GRAPPLE) {
+				this.grappleCD = getCooldown(item.id, this.id)!
+				this.grappleItem = item
 			}
 		}
 		// Load passive effects from entity
@@ -273,6 +278,8 @@ class Entity {
 		this.jumpItem = null
 		this.teleportCD = 11
 		this.teleportItem = null
+		this.grappleCD = 4
+		this.grappleItem = null
 		for (Item item in this.items) {
 			if (item.id == CHIP_ANTIDOTE) {
 				this.antidoteCD = getCooldown(item.id, this.id)!
@@ -286,6 +293,9 @@ class Entity {
 			} else if (item.id == CHIP_TELEPORTATION) {
 				this.teleportCD = getCooldown(item.id, this.id)!
 				this.teleportItem = item
+			} else if (item.id == CHIP_GRAPPLE) {
+				this.grappleCD = getCooldown(item.id, this.id)!
+				this.grappleItem = item
 			}
 		}
 		this.loadEffects()

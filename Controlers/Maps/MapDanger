@@ -315,10 +315,13 @@ class MapDanger {
 	static Map<Cell, real> getEnemiesDmgMap(Entity enemy, Item item){
 		Map<Cell, real> map = [:]
 		Map<Cell, integer> map_mp = [:]
+		// Grapple-extended melee: use grapple range instead of melee range 1-1
+		boolean grappleMelee = item.minRange == 1 && item.maxRange == 1 && enemy.grappleCD <= 1 && enemy.grappleItem != null
+		Item rangeItem = grappleMelee ? enemy.grappleItem! : item
 		// Pass 1: walk-only reachable cells
 		for(Cell cell:integer dist in enemy.reachableCells){
 			if(dist > enemy.mp) break
-			Array<Cell> targetableCells = MapDanger.getCachedTargetableCells(item, cell);
+			Array<Cell> targetableCells = MapDanger.getCachedTargetableCells(rangeItem, cell);
 			for(Cell c in targetableCells){
 				if(map[c]==null){
 					map[c]=1.0
@@ -337,7 +340,7 @@ class MapDanger {
 				if (dist > enemy.mp) continue
 				// Skip cells already walk-reachable at same or lower distance
 				if (enemy.reachableCells[cell] != null && enemy.reachableCells[cell]! <= dist) continue
-				Array<Cell> targetableCells = MapDanger.getCachedTargetableCells(item, cell)
+				Array<Cell> targetableCells = MapDanger.getCachedTargetableCells(rangeItem, cell)
 				for (Cell c in targetableCells) {
 					if (map[c] == null) {
 						map[c] = 1.0
@@ -360,7 +363,7 @@ class MapDanger {
 				if (enemy.reachableCells[cell] != null && enemy.reachableCells[cell]! <= dist) continue
 				// Skip cells already reachable by jump at same or lower distance
 				if (enemy.reachableCellsJump[cell] != null && enemy.reachableCellsJump[cell]! <= dist) continue
-				Array<Cell> targetableCells = MapDanger.getCachedTargetableCells(item, cell)
+				Array<Cell> targetableCells = MapDanger.getCachedTargetableCells(rangeItem, cell)
 				for (Cell c in targetableCells) {
 					if (map[c] == null) {
 						map[c] = 1.0
