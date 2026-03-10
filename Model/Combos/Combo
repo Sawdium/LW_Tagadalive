@@ -3,6 +3,7 @@
  * L'objet combo contient les dommages approximatifs calculé dans MapDanger::getPotentialCombo
  */
 class Combo {
+	static string BULB_NAME = "Fab"
 	Array<Action> actions = []
 	Position? finalPosition = null  // End-of-turn position (best scored cell)
 	real? score = null
@@ -143,7 +144,7 @@ class Combo {
 				}
 
 				// Normal summon: spawn immediately at target cell
-				summon(action.item.id, action.to.id, BulbGreedy.runTurn)
+				summon(action.item.id, action.to.id, BulbGreedy.runTurn, Combo.BULB_NAME)
 				Benchmark.log("SUMMON>" + action.item.name + ">c" + action.to.id)
 				continue
 			}
@@ -194,7 +195,7 @@ class Combo {
 				continue
 			}
 
-			summon(delayedAction.item.id, spawnCell!.id, BulbGreedy.runTurn)
+			summon(delayedAction.item.id, spawnCell!.id, BulbGreedy.runTurn, Combo.BULB_NAME)
 			Benchmark.log("DELAYED_SUMMON>" + delayedAction.item.name + ">c" + spawnCell!.id)
 		}
 
