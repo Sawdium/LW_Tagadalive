@@ -160,21 +160,48 @@ class MapAction {
 		tuples = arraySort(tuples, (ItemTarget a, ItemTarget b) -> b.score - a.score) as Array<ItemTarget>
 
 		// ═══════════════════════════════════════════════════════════════════
-		// PHASE 3: Populate actions (budget-aware)
+		// PHASE 3: Populate actions (two-pass, budget-aware)
 		// ═══════════════════════════════════════════════════════════════════
 		integer totalTuples = count(tuples)
-		integer processed = 0
+		integer pass1Count = 0
+		integer pass2Count = 0
+		integer emergencyBudget = (getMaxOperations() * 0.95) as integer
+
+		// --- Pass 1: Best tuple per item (guaranteed coverage) ---
+		Map<integer, boolean> seenItems = [:]
 
 		for (ItemTarget tuple in tuples) {
-			// Guarantee at least 3 actual actions (for bulbs starting late), then check budget
-			if (_actionsCreated >= 3 && getOperations() > actionBudget) {
-				MapAction._logEarlyExit(processed, totalTuples)
+			if (seenItems[tuple.item.id]) continue
+			seenItems[tuple.item.id] = true
+
+			if (getOperations() > emergencyBudget) {
+				MapAction._logEarlyExit(pass1Count, 0, totalTuples, "pass1")
 				EffectCache.logStats()
 				return;
 			}
 
 			MapAction._populateActionsForTarget(tuple.item, tuple.target)
-			processed++
+			pass1Count++
+		}
+
+		// --- Pass 2: Remaining tuples in score order (budget-aware) ---
+		Map<integer, boolean> pass2Seen = [:]
+
+		for (ItemTarget tuple in tuples) {
+			// Skip first tuple per item (already processed in Pass 1)
+			if (!pass2Seen[tuple.item.id]) {
+				pass2Seen[tuple.item.id] = true
+				continue
+			}
+
+			if (getOperations() > actionBudget) {
+				MapAction._logEarlyExit(pass1Count, pass2Count, totalTuples, "pass2")
+				EffectCache.logStats()
+				return;
+			}
+
+			MapAction._populateActionsForTarget(tuple.item, tuple.target)
+			pass2Count++
 		}
 
 		// Log cache stats at end of action pool creation
@@ -185,10 +212,10 @@ class MapAction {
 	/*
 	 * Log early exit due to budget exhaustion
 	 */
-	static void _logEarlyExit(integer processed, integer total) {
+	static void _logEarlyExit(integer pass1, integer pass2, integer total, string phase) {
 		string entity = Fight.self.isBulb ? "bulb" : "leek"
-		string msg = entity + " T" + getTurn() + " MapAction early exit @" + Benchmark.format(getOperations())
-		msg += " | tuples:" + processed + "/" + total + " | actions:" + _actionsCreated
+		string msg = entity + " T" + getTurn() + " MapAction early exit (" + phase + ") @" + Benchmark.format(getOperations())
+		msg += " | pass1:" + pass1 + " pass2:" + pass2 + "/" + total + " | actions:" + _actionsCreated
 		debugW(msg)
 	}
 
