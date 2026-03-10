@@ -6,7 +6,7 @@ class PendingBulb {
 	BulbStats stats           // Current stats (updated by buffs)
 	Entity target             // Who the bulb will attack
 	Array<Item> offensiveChips // Bulb's damage chips
-	integer bulbType          // Entity.BULB_LIGHTNING, etc.
+	integer bulbType          // BULB_LIGHTNING, etc.
 	real currentDmgScore      // Damage score already applied to Consequences
 
 	constructor(BulbStats stats, Entity target, Array<Item> offensiveChips, integer bulbType, real initialDmgScore) {
@@ -26,9 +26,9 @@ class PendingBulb {
 	 * Uses EntityCoefs lookup with fallback to generic ENTITY_BULB.
 	 */
 	real getCoef(integer stat) {
-		Map<integer, real>? coefs = EntityCoefs.baseCoefs[this.bulbType]
+		Map<integer, real>? coefs = EntityCoefs.bulbCoefs[this.bulbType]
 		if (coefs == null) {
-			coefs = EntityCoefs.baseCoefs[ENTITY_BULB]
+			coefs = EntityCoefs.entityCoefs[ENTITY_BULB]
 		}
 		return coefs![stat]!
 	}

@@ -470,33 +470,33 @@ class EffectHandlers {
 
 		// Factor: duplicate bulbs
 		real duplicateFactor
-		boolean isStrBulb = bulbType == Entity.BULB_FIRE || bulbType == Entity.BULB_ICED || bulbType == Entity.BULB_LIGHTNING || bulbType == Entity.BULB_ROCKY
-		if (bulbType == Entity.BULB_HEALER) {
-			integer existingCount = BattleState.countHealer
+		boolean isStrBulb = bulbType == BULB_FIRE || bulbType == BULB_ICED || bulbType == BULB_LIGHTNING || bulbType == BULB_ROCKY
+		if (bulbType == BULB_HEALER) {
+			integer existingCount = BattleState.getBulbCount(BULB_HEALER)
 			if (existingCount == 0) duplicateFactor = 3.0
 			else if (existingCount == 1) duplicateFactor = 2.0
 			else if (existingCount == 2) duplicateFactor = 1.5
 			else if (existingCount == 3) duplicateFactor = 1.0
 			else if (existingCount == 4) duplicateFactor = 0.5
 			else duplicateFactor = -0.1
-		} else if (bulbType == Entity.BULB_SAVANT) {
-			integer existingCount = BattleState.countSavant
+		} else if (bulbType == BULB_SAVANT) {
+			integer existingCount = BattleState.getBulbCount(BULB_SAVANT)
 			if (existingCount == 0) duplicateFactor = 3.0
 			else if (existingCount == 1) duplicateFactor = 2.0
 			else if (existingCount == 2) duplicateFactor = 1.5
 			else if (existingCount == 3) duplicateFactor = 1.0
 			else if (existingCount == 4) duplicateFactor = 0.5
 			else duplicateFactor = -0.1
-		} else if (bulbType == Entity.BULB_WIZARD) {
-			integer existingCount = BattleState.countWizard
+		} else if (bulbType == BULB_WIZARD) {
+			integer existingCount = BattleState.getBulbCount(BULB_WIZARD)
 			if (existingCount == 0) duplicateFactor = 3.0
 			else if (existingCount == 1) duplicateFactor = 2.0
 			else if (existingCount == 2) duplicateFactor = 1.5
 			else if (existingCount == 3) duplicateFactor = 1.0
 			else if (existingCount == 4) duplicateFactor = 0.5
 			else duplicateFactor = -0.1
-		} else if (bulbType == Entity.BULB_METALLIC) {
-			integer existingCount = BattleState.countMetal
+		} else if (bulbType == BULB_METALLIC) {
+			integer existingCount = BattleState.getBulbCount(BULB_METALLIC)
 			if (existingCount == 0) duplicateFactor = 3.0
 			else if (existingCount == 1) duplicateFactor = 1.5
 			else if (existingCount == 2) duplicateFactor = 0.5
@@ -526,7 +526,7 @@ class EffectHandlers {
 		if (BattleState.allyLeekCount <= 1) duplicateFactor *= 2.0
 
 		// Non-metallic bulbs are nearly worthless vs OTK (die instantly)
-		if (BattleState.enemyHasOTK && bulbType != Entity.BULB_METALLIC) duplicateFactor *= 0.2
+		if (BattleState.enemyHasOTK && bulbType != BULB_METALLIC) duplicateFactor *= 0.2
 
 		return totalValue * turnFactor * duplicateFactor
 	}

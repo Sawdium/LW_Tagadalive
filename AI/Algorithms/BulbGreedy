@@ -77,7 +77,7 @@ class BulbGreedy {
 		}
 
 		// Special case: wizard bulb poisons ally with POISON_TO_SCIENCE passive
-		if (Fight.self.extendedType == Entity.BULB_WIZARD) {
+		if (Fight.self.extendedType == BULB_WIZARD) {
 			Entity? psnTarget = null
 			for (integer id : Entity ally in Fight.getAlliesAlive()) {
 				if (ally.isBulb || ally == Fight.self) continue

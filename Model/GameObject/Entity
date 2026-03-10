@@ -3,22 +3,7 @@
  * Il y a un objet Entity instancié pour chacune des entités présente sur le champ de bataille.
  */
 class Entity {
-	// === Bulb Type Constants ===
-	// Extended type values for bulbs (not provided by LeekScript)
-	// Values chosen to not conflict with ENTITY_LEEK (0), ENTITY_BULB (1),
-	// ENTITY_TURRET (2), ENTITY_CHEST (3), ENTITY_MOB (4)
-	static integer BULB_HEALER = 101
-	static integer BULB_WIZARD = 102
-	static integer BULB_FIRE = 103
-	static integer BULB_ICED = 104
-	static integer BULB_LIGHTNING = 105
-	static integer BULB_METALLIC = 106
-	static integer BULB_ROCKY = 107
-	static integer BULB_PUNY = 108
-	static integer BULB_TACTICIAN = 109
-	static integer BULB_SAVANT = 110
-
-	// Bulb type to register key mapping
+	// Bulb type to register key mapping (uses game-provided BULB_* constants)
 	static Map<integer, string> BULB_KEYS = [
 		BULB_HEALER: "healer",
 		BULB_WIZARD: "wizard",
@@ -84,6 +69,7 @@ class Entity {
 	boolean isGraal = false      // Fennel King boss: graal that must NOT be moved
 	boolean isFennelKing = false // Fennel King boss: main boss (boosted TP/MP shackle coefs)
 	boolean isEvilPumpkin = false // PotiMalef boss: pumpkin (boosted relshield coefs)
+	boolean isProtected = false  // Friendly alt (tagadalton): don't target, don't fear
 	boolean hasCovid = false     // Has COVID effect active (propagates to nearby entities)
 	integer antidoteCD = 5       // CHIP_ANTIDOTE cooldown (5 = no antidote chip, 0-4 = current cd)
 	integer nextAntidote = 5     // Turns until enemy team can antidote this entity (0-5, set by MapDanger)
@@ -101,7 +87,7 @@ class Entity {
 	boolean isOTK = false        // Entity has OTK potential (high STR + AGI + SNC)
 	boolean willBeDead = false   // Poison will kill before anyone can antidote (set by MapDanger)
 	integer entityType  // ENTITY_LEEK, ENTITY_BULB, ENTITY_TURRET, ENTITY_CHEST, ENTITY_MOB
-	integer extendedType  // Cached: for bulbs, specific type (101-108); otherwise same as entityType
+	integer extendedType  // Cached: for bulbs, getBulbType() (BULB_FIRE, etc.); otherwise same as entityType
 	// gestions des effets
 	Array<EntityEffect> effects = []
 	Map<Item, Array<EffectOverTime>> items_effectOverTime = [:]
@@ -194,21 +180,12 @@ class Entity {
 		// Fennel King boss: detect main boss (boosted TP/MP shackle coefs)
 		this.isFennelKing = this.name == "fennel_king"
 		this.isEvilPumpkin = this.name == "evil_pumpkin"
+		this.isProtected = !this.isFriend && getFarmerName(id) == "tagadalton"
 		this.entityType = getType(id)!
-		// Cache extended type (bulb-specific type detection done once here)
+		// Cache extended type via getBulbType() API (15 ops, replaces name matching)
 		if (this.isBulb) {
-			string n = this.name
-			if (n == "metallic_bulb") this.extendedType = BULB_METALLIC
-			else if (n == "healer_bulb") this.extendedType = BULB_HEALER
-			else if (n == "lightning_bulb") this.extendedType = BULB_LIGHTNING
-			else if (n == "wizard_bulb") this.extendedType = BULB_WIZARD
-			else if (n == "fire_bulb") this.extendedType = BULB_FIRE
-			else if (n == "iced_bulb") this.extendedType = BULB_ICED
-			else if (n == "rocky_bulb") this.extendedType = BULB_ROCKY
-			else if (n == "puny_bulb") this.extendedType = BULB_PUNY
-			else if (n == "tactician_bulb") this.extendedType = BULB_TACTICIAN
-			else if (n == "savant_bulb") this.extendedType = BULB_SAVANT
-			else this.extendedType = ENTITY_BULB
+			integer bt = getBulbType(id)
+			this.extendedType = bt != -1 ? bt : ENTITY_BULB
 		} else {
 			this.extendedType = this.entityType
 		}

@@ -21,171 +21,21 @@
 class MapSummon {
 
 	// ═══════════════════════════════════════════════════════════════════════════
-	// BULB PROFILES - Static data for each bulb type
+	// BULB PROFILES - Stats fetched dynamically via getBulbCharacteristics()
 	// ═══════════════════════════════════════════════════════════════════════════
-
-	// Lightning Bulb profile
-	// Stats: life 400-600, str 0-400, agi 0-100, mp 4-6, tp 6-10, snc 0-200
-	static BulbProfile PROFILE_LIGHTNING = BulbProfile(
-		Entity.BULB_LIGHTNING, CHIP_LIGHTNING_BULB,
-		400, 600,   // life
-		0, 400,     // str
-		0, 100,     // agi
-		4, 6,       // mp
-		6, 10,      // tp
-		0, 200,     // snc
-		0, 0,       // wsd
-		0, 0,       // mgc
-		0, 0        // rst
-	)
-
-	// Fire Bulb profile
-	// Stats: life 300-500, str 0-300, agi 0-100, mp 3-5, tp 4-9, wsd 0-200
-	static BulbProfile PROFILE_FIRE = BulbProfile(
-		Entity.BULB_FIRE, CHIP_FIRE_BULB,
-		300, 500,   // life
-		0, 300,     // str
-		0, 100,     // agi
-		3, 5,       // mp
-		4, 9,       // tp
-		0, 0,       // snc
-		0, 200,     // wsd
-		0, 0,       // mgc
-		0, 0        // rst
-	)
-
-	// Iced Bulb profile
-	// Stats: life 300-500, str 0-300, agi 0-100, mp 3-4, tp 5-8, snc 0-200
-	static BulbProfile PROFILE_ICED = BulbProfile(
-		Entity.BULB_ICED, CHIP_ICED_BULB,
-		300, 500,   // life
-		0, 300,     // str
-		0, 100,     // agi
-		3, 4,       // mp
-		5, 8,       // tp
-		0, 200,     // snc
-		0, 0,       // wsd
-		0, 0,       // mgc
-		0, 0        // rst
-	)
-
-	// Rocky Bulb profile
-	// Stats: life 400-600, str 0-200, agi 0-100, mp 2-3, tp 4-8, rst 0-200
-	static BulbProfile PROFILE_ROCKY = BulbProfile(
-		Entity.BULB_ROCKY, CHIP_ROCKY_BULB,
-		400, 600,   // life
-		0, 200,     // str
-		0, 100,     // agi
-		2, 3,       // mp
-		4, 8,       // tp
-		0, 0,       // snc
-		0, 0,       // wsd
-		0, 0,       // mgc
-		0, 200      // rst
-	)
-
-	// Puny Bulb profile (defensive only - no offensive chips)
-	// Stats: life 50-300, str 0-100, agi 0-100, mp 3-5, tp 4-7, snc 0-100, wsd 0-100, rst 0-100
-	static BulbProfile PROFILE_PUNY = BulbProfile(
-		Entity.BULB_PUNY, CHIP_PUNY_BULB,
-		50, 300,    // life
-		0, 100,     // str
-		0, 100,     // agi
-		3, 5,       // mp
-		4, 7,       // tp
-		0, 100,     // snc
-		0, 100,     // wsd
-		0, 0,       // mgc
-		0, 100      // rst
-	)
-
-	// Healer Bulb profile (targets allies, not enemies)
-	// Stats: life 300-400, str 0, agi 0-100, mp 3-6, tp 4-8, wsd 0-300
-	static BulbProfile PROFILE_HEALER = BulbProfile(
-		Entity.BULB_HEALER, CHIP_HEALER_BULB,
-		300, 400,   // life
-		0, 0,       // str
-		0, 100,     // agi
-		3, 6,       // mp
-		4, 8,       // tp
-		0, 0,       // snc
-		0, 300,     // wsd
-		0, 0,       // mgc
-		0, 0        // rst
-	)
-
-	// Metallic Bulb profile (shields allies)
-	// Stats: life 800-1100, str 0, agi 0-100, mp 1-2, tp 5-9, snc 0-200, rst 0-300
-	static BulbProfile PROFILE_METALLIC = BulbProfile(
-		Entity.BULB_METALLIC, CHIP_METALLIC_BULB,
-		800, 1100,  // life
-		0, 0,       // str
-		0, 100,     // agi
-		1, 2,       // mp
-		5, 9,       // tp
-		0, 200,     // snc
-		0, 0,       // wsd
-		0, 0,       // mgc
-		0, 300      // rst
-	)
-
-	// Wizard Bulb profile (poison damage, MGC-based)
-	// Stats: life 300-600, str 0, agi 0-100, mp 4-7, tp 5-8, mgc 0-240
-	static BulbProfile PROFILE_WIZARD = BulbProfile(
-		Entity.BULB_WIZARD, CHIP_WIZARD_BULB,
-		300, 600,   // life
-		0, 0,       // str
-		0, 100,     // agi
-		4, 7,       // mp
-		5, 8,       // tp
-		0, 0,       // snc
-		0, 0,       // wsd
-		0, 240,     // mgc
-		0, 0        // rst
-	)
-
-	// Savant Bulb profile (defensive only - no offensive chips)
-	// Stats: life 400-600, str 0, agi 0-200, mp 4-6, tp 6-8, snc 0-300
-	static BulbProfile PROFILE_SAVANT = BulbProfile(
-		Entity.BULB_SAVANT, CHIP_SAVANT_BULB,
-		400, 600,   // life
-		0, 0,       // str
-		0, 200,     // agi
-		4, 6,       // mp
-		6, 8,       // tp
-		0, 300,     // snc
-		0, 0,       // wsd
-		0, 0,       // mgc
-		0, 0        // rst
-	)
-
-	// Tactician Bulb profile (defensive only - no offensive chips)
-	// Stats: life 500-700, str 0, agi 0-200, mp 6, tp 6
-	static BulbProfile PROFILE_TACTICIAN = BulbProfile(
-		Entity.BULB_TACTICIAN, CHIP_TACTICIAN_BULB,
-		500, 700,   // life
-		0, 0,       // str
-		0, 200,     // agi
-		6, 6,       // mp (flat)
-		6, 6,       // tp (flat)
-		0, 0,       // snc
-		0, 0,       // wsd
-		0, 0,       // mgc
-		0, 0        // rst
-	)
 
 	// Map chip ID -> profile for easy lookup
 	static Map<integer, BulbProfile> PROFILES = [
-		CHIP_LIGHTNING_BULB: PROFILE_LIGHTNING,
-		CHIP_FIRE_BULB: PROFILE_FIRE,
-		CHIP_ICED_BULB: PROFILE_ICED,
-		CHIP_ROCKY_BULB: PROFILE_ROCKY,
-		CHIP_PUNY_BULB: PROFILE_PUNY,
-		CHIP_HEALER_BULB: PROFILE_HEALER,
-		CHIP_METALLIC_BULB: PROFILE_METALLIC,
-		CHIP_WIZARD_BULB: PROFILE_WIZARD,
-		CHIP_SAVANT_BULB: PROFILE_SAVANT,
-		CHIP_TACTICIAN_BULB: PROFILE_TACTICIAN
+		CHIP_LIGHTNING_BULB: BulbProfile(BULB_LIGHTNING, CHIP_LIGHTNING_BULB),
+		CHIP_FIRE_BULB: BulbProfile(BULB_FIRE, CHIP_FIRE_BULB),
+		CHIP_ICED_BULB: BulbProfile(BULB_ICED, CHIP_ICED_BULB),
+		CHIP_ROCKY_BULB: BulbProfile(BULB_ROCKY, CHIP_ROCKY_BULB),
+		CHIP_PUNY_BULB: BulbProfile(BULB_PUNY, CHIP_PUNY_BULB),
+		CHIP_HEALER_BULB: BulbProfile(BULB_HEALER, CHIP_HEALER_BULB),
+		CHIP_METALLIC_BULB: BulbProfile(BULB_METALLIC, CHIP_METALLIC_BULB),
+		CHIP_WIZARD_BULB: BulbProfile(BULB_WIZARD, CHIP_WIZARD_BULB),
+		CHIP_SAVANT_BULB: BulbProfile(BULB_SAVANT, CHIP_SAVANT_BULB),
+		CHIP_TACTICIAN_BULB: BulbProfile(BULB_TACTICIAN, CHIP_TACTICIAN_BULB)
 	]
 
 	// Offensive chips per bulb type (for combo simulation)
@@ -198,13 +48,13 @@ class MapSummon {
 	// Metallic: CHIP_ARMOR (main), CHIP_SHIELD, CHIP_WALL (shields allies!)
 	// Wizard: CHIP_TOXIN (main), CHIP_VENOM (poison, MGC-based)
 	static Map<integer, Array<integer>> BULB_OFFENSIVE_CHIPS = [
-		Entity.BULB_LIGHTNING: [CHIP_LIGHTNING, CHIP_FLASH, CHIP_SHOCK],
-		Entity.BULB_FIRE: [CHIP_METEORITE, CHIP_FLAME, CHIP_SPARK, CHIP_DEVIL_STRIKE],
-		Entity.BULB_ICED: [CHIP_STALACTITE, CHIP_ICEBERG, CHIP_ICE],
-		Entity.BULB_ROCKY: [CHIP_ROCKFALL, CHIP_ROCK, CHIP_PEBBLE],
-		// Entity.BULB_HEALER: [CHIP_VACCINE, CHIP_DRIP, CHIP_CURE, CHIP_BANDAGE],
-		// Entity.BULB_METALLIC: [CHIP_ARMOR, CHIP_SHIELD, CHIP_WALL],
-		// Entity.BULB_WIZARD: [CHIP_TOXIN, CHIP_VENOM]
+		BULB_LIGHTNING: [CHIP_LIGHTNING, CHIP_FLASH, CHIP_SHOCK],
+		BULB_FIRE: [CHIP_METEORITE, CHIP_FLAME, CHIP_SPARK, CHIP_DEVIL_STRIKE],
+		BULB_ICED: [CHIP_STALACTITE, CHIP_ICEBERG, CHIP_ICE],
+		BULB_ROCKY: [CHIP_ROCKFALL, CHIP_ROCK, CHIP_PEBBLE],
+		// BULB_HEALER: [CHIP_VACCINE, CHIP_DRIP, CHIP_CURE, CHIP_BANDAGE],
+		// BULB_METALLIC: [CHIP_ARMOR, CHIP_SHIELD, CHIP_WALL],
+		// BULB_WIZARD: [CHIP_TOXIN, CHIP_VENOM]
 	]
 
 	// Target modes for bulb types
@@ -213,8 +63,8 @@ class MapSummon {
 	static integer TARGET_MODE_ALLY_SHIELD = 2 // Shield allies
 
 	static Map<integer, integer> BULB_TARGET_MODE = [
-		Entity.BULB_HEALER: TARGET_MODE_ALLY_HEAL,
-		Entity.BULB_METALLIC: TARGET_MODE_ALLY_SHIELD
+		BULB_HEALER: TARGET_MODE_ALLY_HEAL,
+		BULB_METALLIC: TARGET_MODE_ALLY_SHIELD
 	]
 
 	// ═══════════════════════════════════════════════════════════════════════════
@@ -598,16 +448,16 @@ class MapSummon {
 
 	// Map bulb type to single letter for display
 	static Map<integer, string> BULB_LETTERS = [
-		Entity.BULB_LIGHTNING: "L",
-		Entity.BULB_FIRE: "F",
-		Entity.BULB_ICED: "I",
-		Entity.BULB_ROCKY: "R",
-		Entity.BULB_PUNY: "P",
-		Entity.BULB_HEALER: "H",
-		Entity.BULB_METALLIC: "M",
-		Entity.BULB_WIZARD: "W",
-		Entity.BULB_SAVANT: "S",
-		Entity.BULB_TACTICIAN: "T"
+		BULB_LIGHTNING: "L",
+		BULB_FIRE: "F",
+		BULB_ICED: "I",
+		BULB_ROCKY: "R",
+		BULB_PUNY: "P",
+		BULB_HEALER: "H",
+		BULB_METALLIC: "M",
+		BULB_WIZARD: "W",
+		BULB_SAVANT: "S",
+		BULB_TACTICIAN: "T"
 	]
 
 	/*
